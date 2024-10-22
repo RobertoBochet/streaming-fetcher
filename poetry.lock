@@ -741,21 +741,6 @@ files = [
 ]
 
 [[package]]
-name = "StreamingCommunity"
-version = "2024.2.7"
-description = ""
-optional = false
-python-versions = "*"
-files = []
-develop = false
-
-[package.source]
-type = "git"
-url = "https://github.com/Blu-Tiger/StreamingCommunity-yt-dlp-plugin.git"
-reference = "863f1fa"
-resolved_reference = "863f1faf7cfcd795f15729079e3dd402f2c07a21"
-
-[[package]]
 name = "typing-extensions"
 version = "4.12.2"
 description = "Backported and Experimental Type Hints for Python 3.8+"
@@ -932,4 +917,4 @@ test = ["pytest (>=8.1,<9.0)", "pytest-rerunfailures (>=14.0,<15.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "2cdd812190817a34a7f9e79f9b6583f3be9e7bb629d0cbda9473bd260e60d81d"
+content-hash = "847c87b923e9a5e9df4a9d836bec0727785e5383da2d91b99a3a6545366be240"
