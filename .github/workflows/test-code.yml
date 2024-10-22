@@ -1,0 +1,14 @@
+name: test-code
+
+on:
+  push:
+
+jobs:
+  test-code:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+      - uses: pre-commit/action@v3.0.1

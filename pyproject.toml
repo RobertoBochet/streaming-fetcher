@@ -1,0 +1,37 @@
+[tool.poetry]
+name = "streaming-fetcher"
+version = "0.dev"
+description = ""
+authors = ["Roberto Bochet <r@robertobochet.me>"]
+license = "GPL-3.0-or-later"
+readme = "README.md"
+repository = "https://github.com/RobertoBochet/streaming-fetcher.git"
+packages = [{include = "streaming_fetcher"}]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+playwright = "^1.48.0"
+yt-dlp = "^2024.10.7"
+StreamingCommunity = { git = "https://github.com/Blu-Tiger/StreamingCommunity-yt-dlp-plugin.git", rev = "863f1fa" }
+python-dateutil = "^2.9.0.post0"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^4.0.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 120
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+
+[tool.bandit]
+exclude_dirs = [".git", ".mypy_cache", ".pytest_cache", ".tox", "venv", "tests", "dist", "build"]
+skips = ["B113"]
+
+[tool.pytest.ini_options]
+addopts = "--order-dependencies --order-scope=session"
