@@ -1,0 +1,3 @@
+[submodule "external/StreamingCommunity-yt-dlp-plugin"]
+	path = external/StreamingCommunity-yt-dlp-plugin
+	url = https://github.com/Blu-Tiger/StreamingCommunity-yt-dlp-plugin.git

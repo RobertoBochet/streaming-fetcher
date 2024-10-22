@@ -34,8 +34,12 @@ More information available in the [official docs](https://playwright.dev/python/
 
 ```python
 import asyncio
+import logging
 from pathlib import Path
 from streaming_fetcher import StreamingFetcher, AnimeUnityFetchTask
+
+# streaming_fetcher uses the python standard logging library
+logging.basicConfig(level=logging.INFO)
 
 anime_fetcher = StreamingFetcher(base_path=Path('/mnt/media-library'))
 
