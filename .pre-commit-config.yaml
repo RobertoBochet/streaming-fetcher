@@ -82,10 +82,6 @@ repos:
     hooks:
       - id: python-safety-dependencies-check
         args: ["-i", "70612"]
-  - repo: https://github.com/rhysd/actionlint
-    rev: v1.7.3
-    hooks:
-      - id: actionlint
   - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
     rev: v2.14.0
     hooks:
