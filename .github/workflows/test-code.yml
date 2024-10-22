@@ -1,14 +1,21 @@
 name: test-code
 
 on:
-  push:
+  pull_request:
 
 jobs:
   test-code:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v3
-      - name: Install Poetry
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Poetry Action
         uses: snok/install-poetry@v1
+        with:
+          version: '1.8.4'
       - uses: pre-commit/action@v3.0.1
+      - uses: pre-commit-ci/lite-action@v1.1.0
+        if: always()

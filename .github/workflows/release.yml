@@ -16,6 +16,8 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: 'true'
       - name: Get version
         run: |
           VERSION="${GITHUB_REF/refs\/tags\//}"
@@ -59,6 +61,8 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: 'true'
       - name: Get version
         run: |
           VERSION="${GITHUB_REF/refs\/tags\//}"
