@@ -24,7 +24,7 @@ classifiers = [
 [tool.poetry.dependencies]
 python = "^3.12"
 playwright = "^1.48.0"
-yt-dlp = "^2024.10.7"
+yt-dlp = "^2024.10.22"
 python-dateutil = "^2.9.0.post0"
 
 [tool.poetry.group.dev.dependencies]

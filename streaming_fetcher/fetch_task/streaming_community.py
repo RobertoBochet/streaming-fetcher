@@ -1,14 +1,30 @@
 import asyncio
 import re
+import traceback
 from collections.abc import Callable
+from itertools import chain
+from typing import TypedDict
 
 from playwright.async_api import Page, Route, async_playwright
-from yt_dlp import YoutubeDL
+from yt_dlp import DownloadError, YoutubeDL
 
 from streaming_fetcher.utils import PlaywrightUtils
 
+from ..exceptions import FetchEpisodeFailed
 from .episode_fetch_task import EpisodeFetchTask
 from .fetch_task import FetchTask
+
+
+class EpisodeData(TypedDict):
+    id: int
+    number: int
+    name: str
+    plot: str
+    duration: int
+    scws_id: int
+    season_id: int
+    created_at: str
+    uploaded_at: str
 
 
 class StreamingCommunityFetchTask(FetchTask):
@@ -19,23 +35,33 @@ class StreamingCommunityFetchTask(FetchTask):
 
     _regex_season = re.compile("^(?:Stagione|Parte) ([0-9]+)")
 
+    _yt_dlp_options = {"quiet": True, "noprogress": True, "retries": 5, "prefer_free_formats": False}
+
     def __init__(
         self,
         show_id: str,
         /,
-        episode_number: Callable[[dict, int], int | list[int]] | None = None,
+        episode_number: Callable[[EpisodeData, int], int | tuple[int, ...]] | None = None,
+        yt_dlp_options: dict = None,
         **kwargs,
     ):
         super().__init__(**kwargs)
         self.show_id = show_id
         self.episode_number = episode_number
 
-    def get_episode_number(self, episode_data: dict, season: int) -> int | list[int]:
+        if yt_dlp_options is not None:
+            self._yt_dlp_options = {**self._yt_dlp_options, **yt_dlp_options}
+
+    def get_episode_number(self, episode_data: EpisodeData, season: int) -> int | list[int]:
         if self.episode_number is not None:
             e = self.episode_number(episode_data, season)
             if e is not None:
                 return e
-        return episode_data.get("number")
+        return episode_data["number"]
+
+    @property
+    def yt_dlp_options(self) -> dict:
+        return self._yt_dlp_options
 
     @classmethod
     def get_season_number_from_name(cls, name: str) -> int:
@@ -105,16 +131,35 @@ class StreamingCommunityFetchTask(FetchTask):
 
         return tasks
 
+    @staticmethod
+    def _remove_task_files(task: EpisodeFetchTask) -> None:
+        # remove the working file
+        task.path.unlink(missing_ok=True)
+        # remove temp files
+        temp_files = chain(
+            task.path.parent.glob(f"{task.path.stem}.*{task.path.suffix}"),
+            task.path.parent.glob(f"{task.path.name}.par*"),
+        )
+        for f in temp_files:
+            f.unlink()
+
     async def fetch_episode(self, task: EpisodeFetchTask):
+        if task.path.suffix not in [".mp4"]:
+            self._logger.warning(
+                f"{task.path.name} extension wrong: yt-dlp works with MPEG-TS; right extension should be .mp4"
+            )
+
         with YoutubeDL(
-            {
-                "paths": {"home": str(task.path.parent)},
-                "outtmpl": str(task.path.name),
-                "quiet": True,
-                "noprogress": True,
-            }
+            {**self.yt_dlp_options, "paths": {"home": str(task.path.parent)}, "outtmpl": str(task.path.name)}
         ) as ydl:
-            await asyncio.to_thread(ydl.download, [task.url])
+            try:
+                await asyncio.to_thread(ydl.download, [task.url])
+            except DownloadError as e:
+                self._logger.debug(traceback.format_exc())
+
+                self._remove_task_files(task)
+
+                raise FetchEpisodeFailed() from e
 
     def __str__(self) -> str:
         return self.show_id
