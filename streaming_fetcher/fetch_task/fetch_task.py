@@ -1,14 +1,15 @@
 from abc import ABC
-from asyncio import Semaphore
 from functools import cached_property
 from logging import getLogger
 from pathlib import Path
 from typing import Callable
 
 from .episode_fetch_task import EpisodeFetchTask
+from .fetch_task_configuration import FetchTaskConfiguration
 
 
 class FetchTask(ABC):
+    configuration = FetchTaskConfiguration()
 
     @cached_property
     def _logger(self):
@@ -54,29 +55,3 @@ class FetchTask(ABC):
 
     async def fetch_episode(self, task: EpisodeFetchTask) -> None:
         pass
-
-    _fetch_episode_tasks_default_concurrency = 3
-    _fetch_episode_tasks_limiter: Semaphore | None = None
-
-    @classmethod
-    def get_fetch_episode_tasks_limiter(cls) -> Semaphore:
-        if cls._fetch_episode_tasks_limiter is None:
-            cls._fetch_episode_tasks_limiter = Semaphore(cls._fetch_episode_tasks_default_concurrency)
-        return cls._fetch_episode_tasks_limiter
-
-    @classmethod
-    def set_fetch_episode_tasks_limiter(cls, limiter: Semaphore | int) -> None:
-        cls._fetch_episode_tasks_limiter = limiter if isinstance(limiter, Semaphore) else Semaphore(limiter)
-
-    _fetch_episode_default_concurrency = 3
-    _fetch_episode_limiter: Semaphore | None = None
-
-    @classmethod
-    def get_fetch_episode_limiter(cls) -> Semaphore:
-        if cls._fetch_episode_limiter is None:
-            cls._fetch_episode_limiter = Semaphore(cls._fetch_episode_default_concurrency)
-        return cls._fetch_episode_limiter
-
-    @classmethod
-    def set_fetch_episode_limiter(cls, limiter: Semaphore | int) -> None:
-        cls._fetch_episode_limiter = limiter if isinstance(limiter, Semaphore) else Semaphore(limiter)
