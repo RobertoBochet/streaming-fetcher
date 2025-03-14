@@ -15,7 +15,6 @@ class AnimeUnityFetchTaskConfiguration(FetchTaskConfiguration):
     fetch_episode_tasks_limiter: Semaphore = Semaphore(5)
 
     base_url: str = "https://www.animeunity.so/anime"
-
     headless_browser: bool = True
 
 
