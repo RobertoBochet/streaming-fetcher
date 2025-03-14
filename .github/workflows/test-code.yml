@@ -16,6 +16,7 @@ jobs:
         uses: snok/install-poetry@v1
         with:
           version: '2.1.1'
+          plugins: poetry-plugin-export
       - uses: pre-commit/action@v3.0.1
       - uses: pre-commit-ci/lite-action@v1.1.0
         if: always()
