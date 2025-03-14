@@ -29,7 +29,7 @@ class StreamingFetcher:
         self.tasks.extend(tasks)
 
     async def fetch_episodes_list(self, task: FetchTask):
-        async with task.get_fetch_episode_tasks_limiter():
+        async with task.configuration.fetch_episode_tasks_limiter:
             self._logger.info(f"fetch episodes list {task}")
 
             tasks = await task.fetch_episode_tasks()
@@ -43,7 +43,7 @@ class StreamingFetcher:
             self._logger.info(f">>Skip {task.path.name}")
             return
 
-        async with task.fetch_task.get_fetch_episode_limiter():
+        async with task.fetch_task.configuration.fetch_episode_limiter:
             self._logger.info(f"fetch {task.path.name}")
 
             if self.dry_run:

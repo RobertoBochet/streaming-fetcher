@@ -30,6 +30,9 @@ python-dateutil = "^2.9.0.post0"
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^4.0.1"
 
+[tool.poetry.requires-plugins]
+poetry-plugin-export = ">=1.9"
+
 [tool.black]
 line-length = 120
 

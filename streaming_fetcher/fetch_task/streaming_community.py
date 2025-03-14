@@ -1,6 +1,7 @@
 import asyncio
 import re
 import traceback
+from asyncio import Semaphore
 from collections.abc import Callable
 from itertools import chain
 from typing import TypedDict
@@ -13,6 +14,15 @@ from streaming_fetcher.utils import PlaywrightUtils
 from ..exceptions import FetchEpisodeFailed
 from .episode_fetch_task import EpisodeFetchTask
 from .fetch_task import FetchTask
+from .fetch_task_configuration import FetchTaskConfiguration
+
+
+class StreamingCommunityFetchTaskConfiguration(FetchTaskConfiguration):
+    fetch_episode_tasks_limiter: Semaphore = Semaphore(5)
+    fetch_episode_limiter: Semaphore = Semaphore(5)
+
+    base_url: str = "https://streamingcommunity.computer"
+    yt_dlp_options: dict = {"quiet": True, "noprogress": True, "retries": 5, "prefer_free_formats": False}
 
 
 class EpisodeData(TypedDict):
@@ -28,14 +38,9 @@ class EpisodeData(TypedDict):
 
 
 class StreamingCommunityFetchTask(FetchTask):
-    _fetch_episode_tasks_default_concurrency = 5
-    _fetch_episode_default_concurrency = 5
-
-    _base_url = "https://streamingcommunity.computer"
+    configuration = StreamingCommunityFetchTaskConfiguration()
 
     _regex_season = re.compile("^(?:Stagione|Parte) ([0-9]+)")
-
-    _yt_dlp_options = {"quiet": True, "noprogress": True, "retries": 5, "prefer_free_formats": False}
 
     def __init__(
         self,
@@ -50,7 +55,7 @@ class StreamingCommunityFetchTask(FetchTask):
         self.episode_number = episode_number
 
         if yt_dlp_options is not None:
-            self._yt_dlp_options = {**self._yt_dlp_options, **yt_dlp_options}
+            self._yt_dlp_options = {**self.configuration.yt_dlp_options, **yt_dlp_options}
 
     def get_episode_number(self, episode_data: EpisodeData, season: int) -> int | list[int]:
         if self.episode_number is not None:
@@ -82,11 +87,11 @@ class StreamingCommunityFetchTask(FetchTask):
 
     @classmethod
     def get_show_page_url(cls, show_id: str) -> str:
-        return f"{cls._base_url}/titles/{show_id}"
+        return f"{cls.configuration.base_url}/titles/{show_id}"
 
     @classmethod
     def get_watch_episode_url(cls, show_id: int, episode_id: int) -> str:
-        return f"{cls._base_url}/watch/{show_id}?e={episode_id}"
+        return f"{cls.configuration.base_url}/watch/{show_id}?e={episode_id}"
 
     async def fetch_episode_tasks(self):
         async with async_playwright() as playwright:

@@ -1,5 +1,6 @@
 import json
 import re
+from asyncio import Semaphore
 
 from playwright.async_api import Error, Page, async_playwright
 
@@ -7,13 +8,18 @@ from ..exceptions import FetchEpisodeFailed, FetchEpisodeRateLimitExceeded
 from ..utils import PlaywrightUtils
 from .episode_fetch_task import EpisodeFetchTask
 from .fetch_task import FetchTask
+from .fetch_task_configuration import FetchTaskConfiguration
+
+
+class AnimeUnityFetchTaskConfiguration(FetchTaskConfiguration):
+    fetch_episode_tasks_limiter: Semaphore = Semaphore(5)
+
+    base_url: str = "https://www.animeunity.so/anime"
+    headless_browser: bool = True
 
 
 class AnimeUnityFetchTask(FetchTask):
-    _fetch_episode_tasks_default_concurrency = 5
-    _fetch_episode_default_concurrency = 3
-
-    _base_url = "https://www.animeunity.to/anime"
+    configuration = AnimeUnityFetchTaskConfiguration()
 
     _regex_season = re.compile(r"([0-9]+)\s*(?:Part [0-9]+)?\s*(?:\(ITA\))?\s*$", flags=re.IGNORECASE)
 
@@ -31,7 +37,7 @@ class AnimeUnityFetchTask(FetchTask):
 
     @classmethod
     def get_show_page_url(cls, show_id: str) -> str:
-        return f"{cls._base_url}/{show_id}"
+        return f"{cls.configuration.base_url}/{show_id}"
 
     @classmethod
     def get_watch_episode_url(cls, show_id: str, episode_id: int) -> str:
@@ -39,7 +45,7 @@ class AnimeUnityFetchTask(FetchTask):
 
     async def fetch_episode_tasks(self):
         async with async_playwright() as playwright:
-            browser = await playwright.firefox.launch()
+            browser = await playwright.firefox.launch(headless=self.configuration.headless_browser)
             browser_context = await browser.new_context(java_script_enabled=False)
 
             page = await browser_context.new_page()
