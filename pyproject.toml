@@ -23,12 +23,12 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.12"
-playwright = "^1.48.0"
-yt-dlp = "^2024.10.22"
+playwright = "^1.50.0"
+yt-dlp = "^2025.2.19"
 python-dateutil = "^2.9.0.post0"
 
 [tool.poetry.group.dev.dependencies]
-pre-commit = "^4.0.1"
+pre-commit = "^4.1.0"
 
 [tool.poetry.requires-plugins]
 poetry-plugin-export = ">=1.9"
