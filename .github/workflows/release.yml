@@ -15,7 +15,7 @@ jobs:
       attestations: write
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: 'true'
       - name: Get version
@@ -60,7 +60,7 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: 'true'
       - name: Get version
@@ -74,17 +74,17 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.13"
       - name: Install Poetry Action
         uses: snok/install-poetry@v1
         with:
-          version: '1.8.4'
+          version: '2.2.1'
       - name: Build package
         run: |
           poetry build
       - name: pypi-publish
-        uses: pypa/gh-action-pypi-publish@v1.9.0
-      - uses: actions/upload-artifact@v4
+        uses: pypa/gh-action-pypi-publish@v1.13.0
+      - uses: actions/upload-artifact@v5
         with:
           name: python-packages
           path: |
@@ -98,7 +98,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v6
         with:
           name: python-packages
       - uses: softprops/action-gh-release@v2
