@@ -1,39 +1,45 @@
-FROM python:3.12-bookworm AS compiler
-
-RUN apt update \
-    && apt install --no-install-recommends -y \
-        curl \
-        build-essential \
-        pipx \
-        git
-
-ENV PATH="/root/.local/bin:${PATH}"
-
-RUN pipx install poetry==1.8.4
+FROM python:3.13-slim AS compiler
 
 WORKDIR /app
 
 COPY . .
 
-RUN poetry build --format wheel
+ENV PATH="/root/.local/bin:${PATH}"
 
+RUN <<EORUN
+set -e
 
-FROM python:3.12-slim
+apt update
+apt install --no-install-recommends -y \
+    curl \
+    build-essential \
+    pipx \
+    git
 
-RUN apt update \
-    && apt install --no-install-recommends -y \
-        git \
-        ffmpeg
+pipx install poetry==2.2.1
+
+poetry build --format wheel
+
+EORUN
+
+FROM python:3.13-slim
 
 WORKDIR /app
 
 COPY --from=compiler /app/dist/*.whl .
 
-RUN pip3 install --no-cache-dir -- *.whl
+RUN <<EORUN
+set -e
 
-RUN rm *.whl
+apt update
+apt install --no-install-recommends -y  git ffmpeg
 
-RUN playwright install --with-deps firefox
+pip3 install --no-cache-dir -- *.whl
+rm *.whl
+
+playwright install --with-deps firefox
+
+EORUN
 
 ENV SB__BROWSER__TYPE="firefox"
 
